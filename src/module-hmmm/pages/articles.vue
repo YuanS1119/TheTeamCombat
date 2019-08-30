@@ -15,15 +15,17 @@
     </el-row>
     <el-row>
       <el-table :data="tableData" border style="width: 100%">
-        <el-table-column prop label="序号" width="100"></el-table-column>
-        <el-table-column prop label="标题" width="550"></el-table-column>
-        <el-table-column prop label="阅读数" width="100"></el-table-column>
-        <el-table-column prop label="状态" width="100"></el-table-column>
-        <el-table-column prop label="录入人" width="100"></el-table-column>
-        <el-table-column label="操作" width="220">
+        <el-table-column prop="id" label="序号" width="100"></el-table-column>
+        <el-table-column prop="title" label="标题" width="550"></el-table-column>
+        <el-table-column prop="visits" label="阅读数" width="100"></el-table-column>
+        <el-table-column prop="state" label="状态" :formatter="formatter" width="95"></el-table-column>
+        <el-table-column prop="creator" label="录入人" width="100"></el-table-column>
+        <el-table-column label="操作" width="200">
           <template>
-            <el-button type="text" size="small">查看</el-button>
-            <el-button type="text" size="small">编辑</el-button>
+            <el-button type="text" size="small">预览</el-button>
+            <el-button type="text" size="small">删除</el-button>
+            <el-button type="text" size="small">修改</el-button>
+            <el-button type="text" size="small">禁用</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -32,12 +34,34 @@
 </template>
 
 <script>
+import { list } from '@/api/hmmm/articles'
 export default {
   name: 'ArticlesList',
   data() {
     return {
-      tableData: {}
+      tableData: {
+        id: '', // 序号
+        title: '', // 标题
+        visits: '', // 阅读数
+        state: 1, // 状态
+        creator: '' // 录入人
+      }
     }
+  },
+  methods: {
+    formatter (row, column, cellValue, index) {
+        return cellValue ? '禁用' : '启用'
+    }
+  },
+  filters: {
+    changeStatus () {
+      let status = this.tableData.state
+      return status && status === 1 ? '禁用' : '启用 '
+    }
+  },
+  async created () {
+    const res = await list()
+    this.tableData = res.data.items
   }
 }
 </script>
@@ -61,7 +85,7 @@ export default {
         background-color: rgba(242, 242, 242, 1);
       }
       .input {
-        width: 152px;
+        width: 162px;
         height: 28px;
         border-radius: 4px;
         font-size: 14px;
