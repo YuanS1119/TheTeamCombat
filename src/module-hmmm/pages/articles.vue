@@ -6,16 +6,17 @@
     <el-row class="search">
       <div class="left">
         <label>关键字</label>
-        <el-input class="input" placeholder="请输入题目编号/题干"></el-input>
+        <el-input class="input" ref="iptValue" v-model="searchValue" placeholder="请输入题目编号/题干"></el-input>
       </div>
+      {{searchValue}}
       <div class="right">
         <el-button>清除</el-button>
-        <el-button type="primary">搜索</el-button>
+        <el-button type="primary" @click="search">搜索</el-button>
       </div>
     </el-row>
     <el-row>
       <el-table :data="tableData" border style="width: 100%">
-        <el-table-column prop="id" label="序号" width="100"></el-table-column>
+        <el-table-column prop="id" label="序号" width="95"></el-table-column>
         <el-table-column prop="title" label="标题" width="550"></el-table-column>
         <el-table-column prop="visits" label="阅读数" width="100"></el-table-column>
         <el-table-column prop="state" label="状态" :formatter="formatter" width="95"></el-table-column>
@@ -30,6 +31,17 @@
         </el-table-column>
       </el-table>
     </el-row>
+    <el-row style="float:right;margin-top: 15px;">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="changePage"
+        :current-page="page.page"
+        :page-sizes="[5, 10, 15, 20]"
+        :page-size="page.pagesize"
+        layout="sizes, prev, pager, next, jumper"
+        :total="page.counts"
+      ></el-pagination>
+    </el-row>
   </div>
 </template>
 
@@ -39,35 +51,48 @@ export default {
   name: 'ArticlesList',
   data() {
     return {
-      tableData: {
-        id: '', // 序号
-        title: '', // 标题
-        visits: '', // 阅读数
-        state: 1, // 状态
-        creator: '' // 录入人
-      }
+      tableData: [],
+      page: {
+        counts: 1, // 总条数
+        pagesize: 5, // 页大小
+        page: 1 // 当前页
+      },
+      searchValue: ''
     }
   },
   methods: {
-    formatter (row, column, cellValue, index) {
-        return cellValue ? '禁用' : '启用'
-    }
+    async getTableData() {
+      const res = await list(this.page)
+      this.tableData = res.data.items
+      this.page.counts = res.data.counts
+    },
+    // table内部过滤器
+    formatter(row, column, cellValue, index) {
+      return cellValue ? '禁用' : '启用'
+    },
+    // 搜索值
+    search () {
+    },
+    // 分页
+     async handleSizeChange (val) {
+        this.page.pagesize = val
+        this.getTableData()
+    },
+    async changePage(newpage) {
+      this.page.page = newpage
+      this.getTableData()
+    } 
   },
   filters: {
-    changeStatus () {
-      let status = this.tableData.state
-      return status && status === 1 ? '禁用' : '启用 '
-    }
   },
-  async created () {
-    const res = await list()
-    this.tableData = res.data.items
+  async created() {
+    this.getTableData()
   }
 }
 </script>
-
 <style lang='less' scoped>
 .dashboard-container {
+  height: 100vh;
   padding: 20px;
   background-color: #fff;
   .search {
