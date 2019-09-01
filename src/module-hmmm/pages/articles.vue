@@ -55,7 +55,8 @@ export default {
         counts: 1, // 总条数
         pagesize: 5, // 页大小
         page: 1, // 当前页
-        keyword: ''
+        keyword: '',
+        pages: 1
       },
 
       searchList: []
