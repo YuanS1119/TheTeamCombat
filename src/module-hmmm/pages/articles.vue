@@ -6,12 +6,11 @@
     <el-row class="search">
       <div class="left">
         <label>关键字</label>
-        <el-input class="input" ref="iptValue" v-model="searchValue" placeholder="请输入题目编号/题干"></el-input>
+        <el-input class="input" ref="iptValue" v-model="page.keyword" placeholder="请输入题目编号/题干"></el-input>
       </div>
-      {{searchValue}}
       <div class="right">
-        <el-button>清除</el-button>
-        <el-button type="primary" @click="search">搜索</el-button>
+        <el-button @click="delData">清除</el-button>
+        <el-button type="primary" @click="getTableData">搜索</el-button>
       </div>
     </el-row>
     <el-row>
@@ -46,7 +45,7 @@
 </template>
 
 <script>
-import { list } from '@/api/hmmm/articles'
+import { list, simple } from '@/api/hmmm/articles'
 export default {
   name: 'ArticlesList',
   data() {
@@ -55,12 +54,18 @@ export default {
       page: {
         counts: 1, // 总条数
         pagesize: 5, // 页大小
-        page: 1 // 当前页
+        page: 1, // 当前页
+        keyword: ''
       },
-      searchValue: ''
+
+      searchList: []
     }
   },
   methods: {
+    delData() {
+      this.$refs.iptValue.clear()
+      this.getTableData()
+    },
     async getTableData() {
       const res = await list(this.page)
       this.tableData = res.data.items
@@ -69,9 +74,6 @@ export default {
     // table内部过滤器
     formatter(row, column, cellValue, index) {
       return cellValue ? '禁用' : '启用'
-    },
-    // 搜索值
-    search () {
     },
     // 分页
      async handleSizeChange (val) {
@@ -83,12 +85,16 @@ export default {
       this.getTableData()
     } 
   },
-  filters: {
-  },
+  // computed: {
+  //   search() {
+      
+  //   }
+  // },
   async created() {
     this.getTableData()
   }
 }
+
 </script>
 <style lang='less' scoped>
 .dashboard-container {
